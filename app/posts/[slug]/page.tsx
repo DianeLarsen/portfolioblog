@@ -7,16 +7,26 @@ import { getPosts, getPostBySlug } from '@/lib/posts'
 import { ArrowLeftIcon } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import NewsletterForm from '@/components/newsletter-form'
-
+type Params = Promise<{ slug: string }>
 export async function generateStaticParams() {
   const posts = await getPosts()
   const slugs = posts.map(post => ({ slug: post.slug }))
 
   return slugs
 }
+export async function generateMetadata(props: {
+  params: Params
+}) {
+  const params = await props.params
 
-export default async function Post({ params }: { params: { slug: string } }) {
-  const { slug } = params
+  const slug = params.slug
+
+}
+export default async function Post(props: { params: Params }) {
+  const params = await props.params
+
+  const slug = params.slug
+
   const post = await getPostBySlug(slug)
 
   if (!post) {

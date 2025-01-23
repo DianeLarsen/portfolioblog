@@ -6,20 +6,23 @@ import MDXContent from '@/components/mdx-content'
 import { ArrowLeftIcon } from 'lucide-react'
 import { getProjectBySlug, getProjects } from '@/lib/projects'
 import { notFound } from 'next/navigation'
-
+type Params = Promise<{ slug: string }>
 export async function generateStaticParams() {
   const projects = await getProjects()
   const slugs = projects.map(project => ({ slug: project.slug }))
 
   return slugs
 }
+export async function generateMetadata(props: { params: Params }) {
+  const params = await props.params
 
-export default async function Project({
-  params
-}: {
-  params: { slug: string }
-}) {
-  const { slug } = params
+  const slug = params.slug
+}
+export default async function Project(props: { params: Params }) {
+  const params = await props.params
+
+  const slug = params.slug
+
   const project = await getProjectBySlug(slug)
 
   if (!project) {
