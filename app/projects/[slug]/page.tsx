@@ -13,11 +13,7 @@ export async function generateStaticParams() {
 
   return slugs
 }
-export async function generateMetadata(props: { params: Params }) {
-  const params = await props.params
 
-  const slug = params.slug
-}
 export default async function Project(props: { params: Params }) {
   const params = await props.params
 
