@@ -1,0 +1,116 @@
+---
+title: Initial Layout - Haven's Heroes
+summary: Haven's Heroes is a private social media site for a group of friends who enjoy gaming and adventures. This post shares the vision behind it and the progress I’ve made so far.
+image: /images/projects/havensheros.webp
+author: 'Diane Larsen'
+publishedAt: '2025-01-29'
+---
+
+
+# Haven's Heroes Website
+
+## Project Overview
+
+Haven's Heroes is a private website designed for a close-knit group of friends who enjoy board games, attending comic conventions, and sharing fun moments. The site will serve as a digital hub for the group, fostering communication, coordination, and camaraderie. Inspired by the group's shared D&D campaign, the site is invite-only and will reflect the spirit of friendship and creativity.
+
+## Key Features
+
+1. **Authentication & Security**
+   - User sign-in and registration system.
+   - Invite-only access.
+   - Encrypted passwords and secure sessions to protect user data.
+
+2. **Community Interaction**
+   - **Chat Functionality:** Real-time group chat for discussions and coordination.
+   - **Posts and Comments:** Users can create posts, comment on others’ posts, and engage in discussions.
+   - **Reactions:** Users can like posts and mark them as "seen."
+
+3. **Polls and Events**
+   - Ability to create polls for group decisions.
+   - Event creation and management, including RSVP functionality.
+   - Notifications and reminders for upcoming events.
+
+4. **Marketplace**
+   - A space for users to list items for sale or give away for free.
+
+5. **Profile Customization**
+   - Users can personalize their profile pages with fun, silly, or simple designs.
+   - Options to upload profile pictures and add bios.
+
+6. **Calendar Integration**
+   - A shared calendar displaying upcoming events.
+   - Email newsletters and reminders for group activities.
+
+## Technologies and Tools
+
+### Core Frameworks
+- **Next.js 15**: The primary framework for building the website, providing server-side rendering and performance optimization.
+
+### Suggested Add-ons
+- **Database**:
+  - **Supabase** (PostgreSQL backend with built-in authentication) or
+  - **MongoDB** (NoSQL, flexible schema).
+- **Chat and Realtime Features**:
+  - **Firebase** (Firestore + Realtime Database) or
+  - **Socket.IO** for chat functionality.
+- **Authentication**:
+  - **NextAuth.js** for seamless authentication integration.
+- **UI Framework**:
+  - **Tailwind CSS** for fast and customizable styling.
+- **State Management**:
+  - **Zustand** or **Redux** for managing global state, particularly for user sessions, posts, and events.
+- **Calendar**:
+  - **FullCalendar.js** or custom solutions using a library like **date-fns**.
+
+### Optional Tools
+- **File Uploads**: Use services like Cloudinary or AWS S3 for profile pictures and post attachments.
+- **Email Services**: Integrate email notifications with SendGrid or Postmark.
+- **Newsletter Management**: Use **Mailchimp API** or **Brevo (formerly Sendinblue)** for email newsletters.
+
+## Project Structure
+
+1. **Frontend**
+   - Developed with Next.js using the App Router.
+   - Tailwind CSS for styling and responsive design.
+
+2. **Backend**
+   - Database for storing user data, posts, events, and polls.
+   - Server-side APIs for handling authentication, posting, and event creation.
+
+3. **Deployment**
+   - Hosting on **Vercel** for seamless Next.js deployment.
+   - Optional: **Netlify** as an alternative.
+
+4. **Development Tools**
+   - **Prettier** and **ESLint** for code formatting and linting.
+   - **GitHub** for version control and collaboration.
+
+## Suggested Features for MVP (Minimum Viable Product)
+
+1. User authentication system with invite-only access.
+2. Ability to create and view posts, comment, and like.
+3. Real-time chat for group discussions.
+4. Event creation with a basic calendar view.
+5. Basic profile customization (uploading profile pictures and setting display names).
+
+## Future Enhancements
+
+1. **Advanced Profiles**: Allow users to choose themes and add more personalization options.
+2. **Marketplace Filters**: Add tags, search, and sorting features for items listed.
+3. **Mobile Optimization**: Ensure the site is fully responsive and works seamlessly on mobile devices.
+4. **Gamification**: Introduce badges or achievements for engagement.
+5. **Integration with External Tools**:
+   - Google Calendar for syncing events.
+   - Discord integration for chat backup.
+6. **Dark Mode**: Provide a toggle for dark and light themes.
+
+## Acknowledgments
+
+- Thanks to the Haven's Heroes group for their inspiration and support.
+- Shoutout to the Next.js and Tailwind CSS communities for their excellent tools and resources.
+
+Stay tuned for further adventures as I bring *Haven’s Heroes* to life. 
+
+
+
+
