@@ -1,0 +1,131 @@
+---
+title: Update - Haven's Heroes
+summary: Building Haven's Heroes: Progress, Challenges, and Lessons Learned
+image: /images/projects/hhupdate.webp
+author: 'Diane Larsen'
+publishedAt: '2025-01-29'
+---
+
+
+
+# Building Haven's Heroes: Progress, Challenges, and Lessons Learned
+
+Over the past few weeks, I have been working on **Haven's Heroes**, a web platform that integrates authentication, user interactions, and event management. This post highlights the key milestones, challenges faced, and solutions implemented along the way.
+
+---
+
+## **🚀 Progress So Far**
+
+### **1️⃣ Setting Up the Project & Authentication**
+- **Tech Stack**: Next.js (App Router), Prisma, Supabase, Clerk (for authentication), Brevo (for emails), and Vercel for deployment.
+- **Authentication**: Implemented user authentication using Clerk, ensuring a seamless login/signup experience with email/password and social sign-ins.
+- **Database Management**: Connected to Supabase to store user data and interactions.
+- **Hosting**: Deployed the site on Vercel, ensuring smooth and reliable performance.
+
+### **2️⃣ Enhancing User Experience**
+- **UI Improvements**: Redesigned the home page to be more welcoming, with proper theme support using Next-Themes.
+- **Navigation & Menus**: Implemented a left-side menu for signed-in users and a clean layout for visitors.
+- **Activity Feed**: Built a structured list of recent activities like new posts, stories, and interactions.
+
+### **3️⃣ Error Handling & Logging**
+- **Database Error Logging**: Created an `errorLogs` table in Supabase to store issues that occur in production.
+- **Email Alerts**: Integrated Brevo to send notifications when critical errors occur (e.g., missing user data after login).
+- **User Feedback**: Added a message prompt when something fails, suggesting a refresh or contacting support.
+
+---
+
+## **🔥 Challenges & How I Overcame Them**
+
+### **1️⃣ Prisma Not Recognizing the New `errorLogs` Table**
+❌ **Issue:** After manually creating the `errorLogs` table in Supabase, Prisma didn’t recognize it.
+
+✅ **Solution:**
+1. **Ran Prisma's database pull to sync the schema:**
+   ```bash
+   npx prisma db pull
+   ```
+2. **Regenerated the Prisma client:**
+   ```bash
+   npx prisma generate
+   ```
+3. **Checked `schema.prisma` and added the correct model mapping:**
+   ```prisma
+   model errorLogs {
+     id        Int      @id @default(autoincrement())
+     message   String
+     details   String?
+     createdAt DateTime @default(now())
+     @@map("errorLogs") // Ensures Prisma recognizes it properly
+   }
+   ```
+
+---
+
+### **2️⃣ Database URL Not Found When Running Prisma Commands**
+❌ **Issue:** Prisma threw an error **"Environment variable not found: DATABASE_URL"** when running `npx prisma db pull`.
+
+✅ **Solution:**
+- Ensured `.env.local` was properly loaded:
+  ```bash
+  npx dotenv -e .env.local -- prisma db pull
+  ```
+- Verified `DATABASE_URL` was accessible:
+  ```bash
+  echo $DATABASE_URL
+  ```
+- Renamed `.env.local` to `.env` temporarily to force Prisma to load it.
+
+---
+
+### **3️⃣ User Data Not Showing in Production**
+❌ **Issue:** User data appeared in Supabase but wasn’t being retrieved in production.
+
+✅ **Solution:**
+- **Confirmed Clerk & Supabase Were Using the Same Database** by ensuring `DATABASE_URL` was the same for both dev and prod.
+- **Added a Case-Sensitivity Fix** for Prisma since PostgreSQL treats `"User"` differently than `user`:
+  ```prisma
+  model User {
+    id       String  @id
+    username String  @unique
+    @@map("User") // Fixes case sensitivity
+  }
+  ```
+- **Re-ran Prisma Sync:**
+  ```bash
+  npx prisma db pull && npx prisma generate
+  ```
+
+---
+
+### **4️⃣ Brevo Email Not Sending Properly**
+❌ **Issue:** Emails weren’t being sent due to an incorrect API client setup.
+
+✅ **Solution:**
+- Used the correct API authentication method:
+  ```ts
+  import SibApiV3Sdk from "sib-api-v3-sdk";
+  
+  const brevoClient = new SibApiV3Sdk.TransactionalEmailsApi();
+  const apiInstance = SibApiV3Sdk.ApiClient.instance;
+  const apiKey = apiInstance.authentications["api-key"];
+  apiKey.apiKey = process.env.BREVO_API_KEY;
+  ```
+- Tested sending emails manually to verify the fix:
+  ```ts
+  await sendEmail({
+    to: "admin@havens-heroes.com",
+    subject: "Test Email",
+    body: "This is a test email from Haven's Heroes."
+  });
+  ```
+
+---
+
+## **🎯 Next Steps**
+✅ **Finalize User Profiles** - Improve UI and profile customization.
+✅ **Enhance Notifications** - Implement in-app notifications for events, polls, and activity updates.
+✅ **Integrate Google Calendar** - Allow users to sync event registrations.
+✅ **Implement Invite-Only Access** - Restrict sign-ups once the site is fully functional.
+
+🚀 **Haven's Heroes is coming together!** Excited for the next phase. Stay tuned for more updates!
+
