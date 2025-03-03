@@ -1,0 +1,327 @@
+---
+title: Update - Haven's Heroes
+summary: Building Haven's Heroes - Progress, Challenges, and Lessons Learned
+image: /images/projects/hhupdate.webp
+author: 'Diane Larsen'
+publishedAt: '2025-03-28'
+---
+
+
+2005-02-28
+# **Fixing Authentication, File Uploads, and Dark Mode in My Next.js App**
+
+## **🚀 Summary of Fixes and Improvements**
+In this update, I worked on **fixing authentication issues, improving file uploads, handling dark mode, and ensuring profile updates work correctly** in my Next.js app. Below is a breakdown of the key fixes and improvements.
+
+---
+
+## **📧 Brevo Email Setup**
+### **Issue:**
+- Emails weren’t being sent in development mode due to a condition preventing email sending.
+- My **Brevo account wasn’t fully activated**, so emails weren’t going through.
+
+### **Fix:**
+- **Removed the dev mode check** in `sendEmail.ts` to allow emails to send in all environments.
+- **Paused email integration** until Brevo activation is complete.
+
+---
+
+## **🔐 Clerk Authentication Fixes**
+### **Issue:**
+- `userId` was sometimes `undefined`, causing authentication issues.
+- Users weren’t always redirected to the **sign-in page** when their session expired.
+
+### **Fix:**
+- Used **`getAuth(headers())` instead of `auth()`** in server actions to properly retrieve the authenticated user.
+- **Immediately redirected users to `/sign-in`** if `userId` was missing.
+- Added a **loading state** to prevent UI flickers while Clerk was resolving authentication.
+
+### **Code Fix:**
+```tsx
+useEffect(() => {
+  if (isLoaded && !userId) {
+    console.error("❌ User not authenticated! Redirecting to sign-in...");
+    router.push("/sign-in");
+  }
+}, [isLoaded, userId, router]);
+```
+
+---
+
+## **🖼 Cloudinary File Upload Fix**
+### **Issue:**
+- `CldUploadWidget` was causing **TypeScript errors** because `result.info` could be either a `string` or an `object`.
+- Cover image **wasn't updating instantly** after upload.
+
+### **Fix:**
+- **Checked if `result.info` was an object before accessing `secure_url`**.
+- **Updated the cover image preview instantly** in the UI after upload.
+- **Displayed a warning message**: "Cover image updated! Changes will not be saved until you press 'Update'."
+
+### **Code Fix:**
+```tsx
+<CldUploadWidget
+  uploadPreset="havens_heroes"
+  onSuccess={(result) => {
+    if (typeof result.info === "object" && result.info !== null && "secure_url" in result.info) {
+      setCover(result.info.secure_url as string);
+      setShowWarning(true);
+    }
+  }}
+>
+```
+
+### **New Feature:**
+✅ Cover image updates instantly after upload.  
+✅ Added a **red warning message** to notify users that changes won't be saved until they press "Update."
+
+---
+
+## **🌙 Dark Mode Fix for `next-themes`**
+### **Issue:**
+- The **modal background was white** even when the system was set to dark mode.
+
+### **Fix:**
+- **Explicitly set dark mode styles** using Tailwind's `dark:` classes.
+- Verified **`ThemeProvider`** was properly set up in `layout.tsx`.
+
+### **Code Fix:**
+```tsx
+<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+```
+
+```tsx
+<form className="bg-white dark:bg-gray-900 dark:text-white p-12 rounded-lg shadow-md">
+```
+
+### **Outcome:**
+✅ The modal now **matches the system's dark mode settings**.  
+✅ No more **white background in dark mode**.
+
+---
+
+## **📝 Prisma Profile Update Fixes**
+### **Issue:**
+- User profile updates **weren’t always saving**.
+- Some **form fields were incorrectly validated**.
+
+### **Fix:**
+- Ensured **all form fields** were properly **filtered before sending data to Prisma**.
+- **Validated input using Zod** to prevent incorrect data from being stored.
+- Added **`revalidatePath("/profile")`** to ensure the page refreshes after updates.
+
+### **Code Fix:**
+```tsx
+const filteredFields = Object.fromEntries(
+  Object.entries(fields).filter(([_, value]) => value !== "")
+);
+
+const Profile = z.object({
+  cover: z.string().optional(),
+  name: z.string().max(60).optional(),
+  surname: z.string().max(60).optional(),
+  description: z.string().max(255).optional(),
+  city: z.string().max(60).optional(),
+  school: z.string().max(60).optional(),
+  work: z.string().max(60).optional(),
+  website: z.string().max(60).optional(),
+});
+
+const validatedFields = Profile.safeParse({ cover, ...filteredFields });
+
+if (!validatedFields.success) {
+  console.log("❌ Validation Error:", validatedFields.error.flatten().fieldErrors);
+  return { success: false, error: true };
+}
+```
+
+### **Outcome:**
+✅ Profile updates now **save properly**.  
+✅ **Input validation prevents bad data** from being stored.  
+✅ **Page refreshes automatically** after profile updates.
+
+---
+
+## **🚀 Final Outcome**
+✅ **Brevo email setup fixed (waiting for account activation).**  
+✅ **Clerk authentication issues resolved (instant logout if `userId` missing).**  
+✅ **Cover image uploads instantly + warning message added.**  
+✅ **Dark mode styling fixed for modal and UI elements.**  
+✅ **Prisma updates properly validate and store user data.**  
+
+---
+
+## **🔜 Next Steps**
+- **Test Brevo email sending** once the account is activated.
+- **Continue testing profile updates** to ensure everything works smoothly.
+
+🚀 **Everything is now working as expected! Let me know if you have any feedback.** 🎉🔥
+
+---
+
+Here’s a markdown summary of everything we’ve done since your last request:
+
+---
+March 3, 2025
+# **Haven's Heroes Development Progress (March 2025)**
+
+## **📌 Fixes & Updates**
+### **1️⃣ Tailwind & PostCSS Fixes**
+- Tailwind wasn’t working properly after reinstalling dependencies.
+- **Fixes applied:**
+  - Changed **`postcss.config.mjs`** to:
+    ```ts
+    /** @type {import('postcss-load-config').Config} */
+    const config = {
+      plugins: {
+        tailwindcss: {},
+      },
+    };
+
+    export default config;
+    ```
+  - Renamed `tailwind.config.js` to `tailwind.config.ts` and updated it for TypeScript compatibility.
+  - Deleted all `node_modules` and `package-lock.json`, then ran:
+    ```sh
+    npm install
+    ```
+  - Fixed PostCSS errors by ensuring Tailwind was correctly initialized.
+
+---
+
+### **2️⃣ Database Schema & Prisma Updates**
+- Needed to add **email notification preferences** to the `User` model.
+- Modified the **Prisma schema**:
+  ```prisma
+  model User {
+    id            String   @id
+    username      String   @unique
+    avatar        String?
+    cover         String?
+    name          String?
+    surname       String?
+    description   String?
+    city          String?
+    school        String?
+    work          String?
+    website       String?
+    createdAt     DateTime @default(now())
+
+    // Email Preferences
+    emailFrequency  String  @default("weekly") // Options: "daily", "weekly"
+    breakingNews    Boolean @default(false)
+    newPolls        Boolean @default(false)
+    newPosts        Boolean @default(false)
+    newEvents       Boolean @default(false)
+    upcomingRSVP    Boolean @default(false)
+
+    @@map("User")
+  }
+  ```
+- **Manually updated Supabase schema** using SQL instead of resetting migrations.
+- Successfully ran:
+  ```sh
+  npx prisma generate
+  ```
+
+---
+
+### **3️⃣ Fixed Clerk & User Data Issues**
+- Attempted to retrieve email from Clerk but initially used an incorrect method.
+- Implemented:
+  ```ts
+  import { createClerkClient } from '@clerk/backend';
+
+  const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+
+  const user = await clerkClient.users.getUser(userId);
+  console.log(user?.emailAddresses[0]?.emailAddress);
+  ```
+- Decided **not** to store emails in Supabase, keeping them only in Clerk for security.
+
+---
+
+### **4️⃣ Fixed Boolean Error in Email Preferences**
+- `defaultChecked` was throwing an error due to nullable `boolean | null` values.
+- **Fixed by ensuring valid boolean values**:
+  ```tsx
+  <input 
+    type="checkbox" 
+    name="breakingNews" 
+    className="notification-checkbox" 
+    defaultChecked={user.breakingNews ?? false} 
+  />
+  ```
+- Applied the same fix to all notification checkboxes.
+
+---
+
+## **🚀 Next Steps**
+- Implement API calls to update **email preferences** in Supabase when a user submits changes.
+- Send a **confirmation email** whenever a user updates their profile.
+- Ensure **notifications respect user preferences** in Brevo.
+
+---
+
+# 🚀 Profile Update Enhancements  
+
+## **🎉 New Features**
+- **Added Birthday Support:** Users can now set their birth month and day in the profile update form.
+- **Improved Email Notifications:** 
+  - Emails are now only sent if changes occur.
+  - The email includes a summary of what was updated (e.g., "Email Preferences", "Birthday") but **not** the actual values.
+- **Refactored Profile Update Logic:**
+  - Tracked modified fields dynamically.
+  - Implemented a mapping system to categorize changes.
+  - Fixed TypeScript errors related to object key indexing.
+
+## **🔧 Code Updates**
+### **1️⃣ Updated `updateProfile` function**
+- Introduced a check to compare existing user data with new values.
+- Only updates **changed** fields in the database.
+- Generates a list of modified categories for notification emails.
+
+### **2️⃣ Updated `UpdateUser` Component**
+- Added UI inputs for **birth month** and **birth day**.
+- Updated form submission logic to pass new fields.
+
+### **3️⃣ Fixed TypeScript Indexing Issues**
+- Properly asserted keys in `validatedFields.data` and `existingUser` to prevent implicit `any` type errors.
+
+---
+
+## **✅ Expected Behavior**
+- Users can now update their **birthday**.
+- Email notifications only trigger when **actual changes** are made.
+- Emails list **changed categories** but **not** actual values.
+- No more TypeScript errors when accessing dynamic object properties.
+
+🚀 **Next Steps:** Further UI improvements and additional profile customization options.  
+
+# **Recent Changes**
+
+## **1️⃣ Implemented Role-Based Access Control**
+- Added `role` field to `User` table in the database (values: `"Admin"` or `"Member"`, default `"Member"`).
+- Updated **Admin page (`app/admin.tsx`)**:
+  - Now restricts access **only to users with `role: "Admin"`**.
+  - Redirects non-admin users to the homepage (`/`).
+
+## **2️⃣ Updated Prisma Queries for Role Check**
+- Used `select: { role: true }` to fetch only the `role` field for better performance.
+- Fixed issues related to **role not being recognized in TypeScript**.
+
+## **3️⃣ Improved Upcoming Birthdays Display**
+- **Birthdays Component:**
+  - Now **excludes users without a birthday**.
+  - Added a **"Members Missing Birthday"** button for users who haven’t set their birthday.
+  - Clicking a username now navigates to their **profile page**.
+
+## **4️⃣ Other Fixes & Improvements**
+- **Fixed Prisma check constraints issue** when adding the `role` column.
+- **Ensured database compatibility** with Prisma by modifying the schema correctly.
+- **Refactored query logic** to improve maintainability and performance.
+
+---
+✅ **Deployment Successful**  
+✅ **Everything is working as expected**  
+🎯 **Next Steps: Further enhancements and admin functionality**
