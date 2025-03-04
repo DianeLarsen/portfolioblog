@@ -1,0 +1,234 @@
+---
+title: Update - Haven's Heroes
+summary: Building Haven's Heroes - Progress, Challenges, and Lessons Learned
+image: /images/projects/hhupdate.webp
+author: 'Diane Larsen'
+publishedAt: '2025-03-04'
+---
+
+---
+
+# **Haven’s Heroes Development Update - March 2025**  
+🚀 *Progress, Fixes, and Lessons Learned*  
+
+---
+
+## **📌 Summary**
+Over the past few weeks, I’ve been making significant improvements to **Haven’s Heroes**, including **fixing authentication issues, improving file uploads, refining role-based access, handling dark mode properly, and streamlining database interactions**.  
+This update highlights the **major fixes, enhancements, and lessons learned** in building the project.  
+
+---
+
+## **🔐 Authentication & User Role Fixes**  
+
+### **1️⃣ Clerk Authentication Fixes**  
+🔹 Issue:  
+- `userId` was sometimes `undefined`, causing authentication failures.  
+- Users were not being **automatically redirected** to the sign-in page when their session expired.  
+
+🔹 Solution:  
+- Used **`getAuth(headers())` instead of `auth()`** to properly retrieve the authenticated user.  
+- Implemented **instant redirection to `/sign-in`** if `userId` was missing.  
+- Added a **loading state** to prevent UI flickers while Clerk was resolving authentication.  
+
+🔹 Code Fix:  
+```tsx
+useEffect(() => {
+  if (isLoaded && !userId) {
+    console.error("❌ User not authenticated! Redirecting to sign-in...");
+    router.push("/sign-in");
+  }
+}, [isLoaded, userId, router]);
+```  
+
+✅ *Outcome:* **Seamless authentication handling with auto-redirects** when needed.  
+
+---  
+
+### **2️⃣ Role-Based Access Control (RBAC) for Admins**  
+🔹 Issue:  
+- Needed a way to **restrict admin-only pages** while keeping the user role data efficient.  
+- **Prisma’s check constraints** caused issues when adding a `role` column to the `User` model.  
+
+🔹 Solution:  
+- **Added a `role` field** to the `User` table with values `"Admin"` and `"Member"`, defaulting to `"Member"`.  
+- Implemented role-based **access restrictions on `/admin`**:
+  - Non-admin users are **redirected to the homepage** instead of seeing an error.  
+  - Used `select: { role: true }` in Prisma to fetch only the necessary field for efficiency.  
+
+🔹 Code Fix (Prisma Model Update):  
+```prisma
+model User {
+  id          String   @id @default(uuid())
+  username    String   @unique
+  role        String   @default("Member") // Admin or Member
+}
+```  
+
+🔹 Code Fix (Server Role Check):  
+```tsx
+import { getUserRole } from "@/lib/actions";
+import Admin from "@/components/Admin";
+
+const AdminPage = async () => {
+  const role = await getUserRole(); // ✅ Fetch role on the server
+
+  return <Admin role={role} />;
+};
+
+export default AdminPage;
+```  
+
+✅ *Outcome:* **Admin-only pages are now properly restricted** and load efficiently.  
+
+---
+
+## **📆 Birthday Tracking Enhancements**  
+
+### **3️⃣ Improved Upcoming Birthdays Display**  
+🔹 Issue:  
+- **Birthdays Component (`Birthdays.tsx`)** was fetching unnecessary data, causing performance issues.  
+- Users **without a birthday** were still being included in the list.  
+
+🔹 Solution:  
+- **Filtered users without a birthday** so they don’t appear in the upcoming birthdays list.  
+- Added a **“Members Missing Birthdays”** section (only visible to admins).  
+- Clicking a user’s name **now navigates to their profile page**.  
+
+🔹 Code Fix (Fetching Upcoming Birthdays):  
+```tsx
+const upcomingBirthdays = await getUpcomingBirthdays(limit);
+const usersMissingBirthdays = isAdmin ? await getUsersMissingBirthdays() : [];
+```  
+
+✅ *Outcome:*  
+- **Only users with birthdays are shown.**  
+- **Admins can track users missing birthdays.**  
+- **Improved UI performance by reducing unnecessary fetch requests.**  
+
+---
+
+## **🖼 Cloudinary File Upload Fixes**  
+
+### **4️⃣ Instant Cover Image Updates**
+🔹 Issue:  
+- `CldUploadWidget` was causing **TypeScript errors** due to mismatched types.  
+- Cover image **wasn’t updating instantly** after upload.  
+
+🔹 Solution:  
+- **Checked if `result.info` was an object before accessing `secure_url`**.  
+- Updated the **cover image preview instantly** after upload.  
+- **Displayed a warning message**: "Cover image updated! Changes will not be saved until you press 'Update'."  
+
+🔹 Code Fix:  
+```tsx
+<CldUploadWidget
+  uploadPreset="havens_heroes"
+  onSuccess={(result) => {
+    if (typeof result.info === "object" && result.info !== null && "secure_url" in result.info) {
+      setCover(result.info.secure_url as string);
+      setShowWarning(true);
+    }
+  }}
+>
+```  
+
+✅ *Outcome:* **Cover image updates instantly, and users get a warning if changes aren't saved.**  
+
+---
+
+## **🌙 Dark Mode Enhancements**  
+
+### **5️⃣ Fixed Dark Mode UI Issues**  
+🔹 Issue:  
+- The **modal background remained white** even in dark mode.  
+
+🔹 Solution:  
+- Explicitly set **dark mode styles** using Tailwind’s `dark:` classes.  
+- Verified **`ThemeProvider`** was properly configured.  
+
+🔹 Code Fix:  
+```tsx
+<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+```  
+
+```tsx
+<form className="bg-white dark:bg-gray-900 dark:text-white p-12 rounded-lg shadow-md">
+```  
+
+✅ *Outcome:* **UI elements now properly reflect system dark mode settings.**  
+
+---
+
+## **🔧 Middleware & Database Optimizations**  
+
+### **6️⃣ Improved Middleware Database Handling**  
+🔹 Issue:  
+- **Database checks were being called multiple times**, causing unnecessary fetch requests.  
+- Intermittent **Supabase connection failures** led to inconsistent app behavior.  
+
+🔹 Solution:  
+- Added a **global variable (`dbConnected`)** to track database connection status.  
+- Prevented redundant checks by **storing the status in middleware**.  
+- Redirected users to a **maintenance page** if the database was down.  
+
+🔹 Code Fix (Middleware Update):  
+```tsx
+declare global {
+  var dbConnected: boolean | undefined;
+}
+globalThis.dbConnected = globalThis.dbConnected ?? false;
+
+export default clerkMiddleware(async (auth, req: NextRequest) => {
+  if (globalThis.dbConnected) {
+    console.log("✅ Database already verified");
+    return NextResponse.next();
+  }
+
+  try {
+    const res = await fetch(`${req.nextUrl.origin}/api/check-db`, {
+      method: "GET",
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      return NextResponse.redirect(new URL("/maintenance", req.url));
+    }
+    
+    globalThis.dbConnected = true;
+  } catch (error) {
+    console.error("❌ Database check failed:", error);
+    return NextResponse.redirect(new URL("/maintenance", req.url));
+  }
+
+  return NextResponse.next();
+});
+```  
+
+✅ *Outcome:*  
+- **Database connections are checked only once per request cycle.**  
+- **Reduced unnecessary API calls and improved performance.**  
+
+---
+
+## **🚀 Final Outcome & Next Steps**  
+
+✅ **Fixed authentication issues (auto-redirect on session expiration).**  
+✅ **Admin role-based access now works properly.**  
+✅ **Birthday tracking is more efficient and only shows valid users.**  
+✅ **Dark mode styling is now fully functional.**  
+✅ **Cover image uploads instantly, with a warning message.**  
+✅ **Middleware now prevents excessive database checks.**  
+
+---
+
+## **🔜 What’s Next?**  
+- **Test Brevo email sending** once the account is activated.  
+- **Refine admin panel UI** for better user management.  
+- **Further optimize database queries** to ensure scalability.  
+
+🚀 **The platform is shaping up well! Looking forward to the next set of improvements.** 🎉  
+
+---
+
+Let me know if you need any changes! 🚀

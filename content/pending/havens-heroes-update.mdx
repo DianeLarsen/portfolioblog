@@ -325,3 +325,52 @@ March 3, 2025
 ✅ **Deployment Successful**  
 ✅ **Everything is working as expected**  
 🎯 **Next Steps: Further enhancements and admin functionality**
+
+
+# **Update - March 4, 2025**
+
+## **1. Mobile Menu Enhancements**
+- Added logic to **close the menu** when a link is clicked.
+- Improved **menu background visibility** by darkening it.
+- Ensured a **smoother transition** when opening/closing the menu.
+
+## **2. Admin Page Role Restriction**
+- Implemented **role-based access control** to restrict non-admin users.
+- Redirects non-admin users back to the homepage.
+- Fetches and validates user role before rendering the page.
+
+## **3. Birthdays Component Improvements**
+- Now **only displays users with birthdays**.
+- Added a **"Members Missing Birthdays"** section, but only visible to **admins**.
+- Created `getUsersMissingBirthdays()` function to retrieve missing data.
+
+## **4. Other Fixes & Optimizations**
+- Ensured database updates reflect changes in **StoryList**, **CommentList**, and **updateProfile**.
+- Improved performance and structure of API calls related to birthdays.
+
+---
+
+#### **📅 2025-03-04**
+#### **🔹 Middleware & Database Handling**
+- Added global tracking for `dbConnected` to avoid multiple database verification calls.
+- Prevented unnecessary database fetches if already verified.
+- Implemented a **role-check in Admin pages** that redirects non-admins instead of showing an "unauthorized" message.
+
+#### **🔹 Fixes in Admin Role Handling**
+- `AdminPage.tsx`: Now fetches `role` on the server and passes it to `Admin.tsx`.
+- `Admin.tsx`: Properly checks `role` and redirects unauthorized users back to home.
+
+#### **🔹 Birthday Component Improvements**
+- **`Birthdays.tsx`**
+  - Prevented "fetch waterfall" issues by ensuring it only loads necessary data when required.
+  - Adjusted `isAdmin` logic to show missing birthdays only when appropriate.
+  - Fixed type errors in user birthday properties (`null` handling for `birthmonth` and `birthday`).
+
+#### **🔹 Prisma & TypeScript Fixes**
+- **Fixed** Prisma type mismatches (`number | null` issue with `birthmonth` and `birthday`).
+- **Ensured** all TypeScript properties are properly handled in components.
+
+---
+
+### **🚀 Summary**
+This update enhances the middleware logic, stabilizes the admin role-checking system, and improves database call efficiency while fixing type errors in the birthday tracking system. Let me know if you need further refinements! 🚀
