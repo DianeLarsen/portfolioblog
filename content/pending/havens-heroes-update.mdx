@@ -371,6 +371,27 @@ March 3, 2025
 - **Ensured** all TypeScript properties are properly handled in components.
 
 ---
-
+3/13/2025
 ### **🚀 Summary**
 This update enhances the middleware logic, stabilizes the admin role-checking system, and improves database call efficiency while fixing type errors in the birthday tracking system. Let me know if you need further refinements! 🚀
+
+# 🔄 Reset and Re-pushed Prisma Schema to Supabase
+
+## ✅ Summary of Changes:
+- **Database Reset:** Cleared out all data and reset Supabase.
+- **Prisma Schema Push:** Used `npx prisma db push` to reapply the schema.
+- **Table Verifications:** Ensured all required tables exist in Supabase.
+- **Fixed Comment Reactions:** Resolved issues related to `CommentReaction` and `Reaction` models.
+- **Prisma Client Updates:** Re-generated Prisma Client and confirmed all relationships.
+- **Seed Data (Optional):** Set up basic seed data for initial testing.
+- **Database Connection Stability:** Verified Prisma can reliably connect to Supabase.
+
+## 🛠️ Steps Taken:
+1. **Cleared Database Issues**
+   - Reset schema issues causing reaction errors.
+   - Ensured no missing or incorrect tables.
+
+2. **Re-applied Prisma Schema**
+   ```sh
+   npx prisma db push
+   npx prisma generate
