@@ -395,3 +395,118 @@ This update enhances the middleware logic, stabilizes the admin role-checking sy
    ```sh
    npx prisma db push
    npx prisma generate
+
+# 📌 Poll Voting System Update
+
+## **✨ New Features**
+This update improves the **poll voting system** by:
+- **Highlighting** the option the user voted for.
+- **Adding a star (⭐) next to the voted option** for clarity.
+- **Preventing duplicate voting** by checking the user's previous votes.
+- **Displaying a confirmation message** after voting.
+- **Enhancing UI** with hover effects and improved styling.
+
+---
+
+## **🚀 How It Works**
+### **1️⃣ If the user has NOT voted yet:**
+- They can **select** an option and **click "Vote"**.
+- Options will change color when hovered over.
+
+### **2️⃣ If the user HAS already voted:**
+- The **selected option will be highlighted** in gold (`bg-yellow-500`).
+- A **star (⭐) appears** next to the voted option.
+- A **message appears**: `"✅ You have already voted in this poll."`
+- The **radio buttons are disabled** to prevent multiple votes.
+
+---
+
+## **📸 Example Output**
+### ✅ **User Has Already Voted**
+# Changelog
+
+## [Unreleased] - 2025-03-19
+### **Added**
+- Implemented event creation with start time and optional end time (defaults to 2 hours after start if not provided).
+- Introduced a separate `AddEvent` component to improve code organization.
+- Added `.ics` file generation for event downloads.
+
+### **Fixed**
+- Fixed Prisma validation issue where `attendees` required a `user_id` by fetching the ID from email.
+- Resolved TypeScript error related to `endTime` assignment.
+- Adjusted form submission logic to prevent creating both a poll and an event in a single post.
+- Improved database health check in middleware to allow `/maintenance` page to load while DB is unavailable.
+
+### **Removed**
+- Temporarily disabled Google Calendar integration until OAuth verification is completed.
+
+---
+# 🐛 Fix Middleware Blocking Static Assets
+
+## 🔧 Changes:
+- **Excluded static assets** (e.g., `.png`, `.jpg`, `.svg`, `.css`, `.js`, etc.) from being processed by middleware.
+- **Prevented middleware from triggering database checks** on image requests.
+- **Ensured `/maintenance` page remains accessible** while the database is being checked in the background.
+- **Improved logging** for better debugging of middleware behavior.
+
+## 🛠️ Fix:
+- Updated `config.matcher` to **ignore static files** so that image requests are **not intercepted** by middleware.
+- Added explicit `if` conditions to **skip middleware for static asset requests**.
+- Ensured `/maintenance` **remains accessible** without interference from database checks.
+
+## ✅ Outcome:
+- **Images now load correctly in production.**
+- **No more unexpected middleware processing on static files.**
+- **Middleware only applies to protected routes, improving performance.**
+# **Event Management and UI Improvements**
+
+## **New Features:**
+### ✏️ **Event Editing**
+- Users can now edit events directly from the event details page.
+- Shows an "Edit Event" button if the user is the creator.
+- Displays the event creator and last editor with timestamps.
+- Uses an `EditEventForm` component to update event details.
+
+### 👥 **RSVP System**
+- Added RSVP buttons to allow users to confirm attendance.
+- Shows a count of attendees on the event card.
+- Buttons update UI instantly after a response.
+- Prevents multiple clicks while processing.
+
+### 🔄 **UI Enhancements**
+- **Back Button:** Allows users to return to the homepage.
+- **Better Date Formatting:** If an event starts and ends on the same day, it only shows the date once.
+- **Attendee List Improvements:** Shows a list of attendees with their RSVP status.
+
+---
+
+## **Code Improvements & Fixes:**
+### ✅ **Prisma Schema Fixes**
+- Fixed missing `creator` and `lastEditor` relationships in the `Event` model.
+- Added `updatedAt` to track last edits.
+- Resolved migration issues by ensuring default values for required fields.
+
+### ⚡ **Performance & Bug Fixes**
+- Removed unused `isPending` variable to fix ESLint warning.
+- Ensured the correct post ID is used when navigating to event details.
+- Used `useTransition` to improve RSVP submission without blocking the UI.
+
+---
+
+## **Updated Prisma Schema**
+```prisma
+model Event {
+  id              Int       @id @default(autoincrement())
+  title           String
+  description     String?
+  startTime       DateTime
+  endTime         DateTime
+  post_id         Int       @unique
+  user_id         String    @db.VarChar
+  last_edited_by  String?   @db.VarChar
+  updatedAt       DateTime  @updatedAt @default(now())
+
+  attendees       Attendee[] @relation("EventAttendees")
+  creator         User      @relation("CreatedEvents", fields: [user_id], references: [id])
+  lastEditor      User?     @relation("EditedEvents", fields: [last_edited_by], references: [id])
+}
