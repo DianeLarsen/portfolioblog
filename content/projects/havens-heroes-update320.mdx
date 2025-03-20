@@ -1,0 +1,76 @@
+---
+title: Haven's Heroes - Feature Updates & Fixes
+summary: New multiple-choice polls, activity feed improvements, authentication fixes, and UI enhancements.
+image: /images/projects/hhupdate.webp
+author: 'Diane Larsen'
+publishedAt: '2025-03-28'
+---
+
+# 🚀 Haven's Heroes - March 2025 Update  
+
+This update introduces **multiple-choice polls, a refined activity feed, authentication fixes, UI improvements, and better role-based access control**.  
+
+---
+
+## **✨ New Features**
+### **📊 Multiple-Choice Polls**
+- Users can now **select multiple options** in polls, ideal for event scheduling or gathering broader feedback.
+- Poll results are now displayed with a **percentage-based bar graph**, showing:
+  - The **percentage of total users who voted**.
+  - The **distribution of votes** for each option.
+
+### **🔔 Improved Activity Feed**
+- Displays **username** in activity logs (e.g., `"New Post from Impixi"`).
+- Shows **relative timestamps** (e.g., `"4 hours ago"`).
+- Highlights post-related activities and event creations.
+
+---
+
+## **🔧 Fixes & Improvements**
+### **🔐 Authentication & Clerk Fixes**
+- Fixed issues where `userId` was sometimes `undefined`, causing login failures.
+- Now **instantly redirects to the sign-in page** if authentication fails.
+- Prevents UI flickering while Clerk resolves user authentication.
+
+### **🌙 Dark Mode Fixes**
+- Resolved an issue where modals had a **white background** in dark mode.
+- Ensured **consistent dark mode support** across all components.
+
+### **🖼 Cloudinary File Upload Fix**
+- Fixed a **TypeScript error** causing uploads to fail.
+- **Instantly updates cover image previews** after upload.
+- Displays a **red warning message**: `"Cover image updated! Changes will not be saved until you press 'Update'."`
+
+### **📝 Prisma & Profile Updates**
+- Fixed a **database validation issue** preventing user profile updates.
+- Added **input validation** to prevent bad data storage.
+- Used **revalidatePath("/profile")** to ensure profile updates appear instantly.
+
+### **🛠 Role-Based Access Control**
+- Implemented **admin-only pages**, preventing non-admin users from accessing them.
+- Redirects unauthorized users **back to the homepage**.
+
+### **📆 Event & RSVP Enhancements**
+- Users can **edit events** and update details.
+- Added an **RSVP system** for event attendance tracking.
+- Event pages now display **creator and last editor details**.
+
+---
+
+## **🚀 Final Outcome**
+✅ **Polls now support multiple-choice options**  
+✅ **Activity feed displays usernames and timestamps**  
+✅ **Authentication issues resolved**  
+✅ **File uploads now update the UI instantly**  
+✅ **Profile updates are validated and saved correctly**  
+✅ **Dark mode fully functional**  
+✅ **Event system improvements, including editing and RSVP tracking**  
+
+---
+
+## **🔜 Next Steps**
+- **Complete email integration** once Brevo activation is finalized.
+- **Enhance poll analytics** to display more detailed voting trends.
+- **Improve event management** by integrating Google Calendar.
+
+🎉 **Haven’s Heroes is steadily improving, and I can’t wait to share more updates soon!** 🚀
