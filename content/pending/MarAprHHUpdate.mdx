@@ -1,0 +1,23 @@
+## ✨ New Features
+- **Poll Voting Overhaul**
+  - Users can now change their votes for multiple-choice polls.
+  - Single-choice polls now allow selecting a different option before submitting.
+  - Poll creators can now edit polls: add/remove options, extend the end date, or allow users to submit their own options.
+  - Polls dynamically update results and pre-select previously voted options.
+
+- **User-Submitted Poll Options**
+  - If `allowUserOptions` is enabled, users can add new options to active polls before voting.
+
+- **DB Health Check Middleware**
+  - Middleware checks the health of the database before allowing page access.
+  - If the database is down, users are redirected to a `/loading` page.
+  - The `/loading` page pings `/api/check-db` every 10 seconds until the DB is healthy, then redirects back to `/`.
+
+## 🛠 Improvements
+- Fixed `Invalid hook call` from `useTheme()` by restructuring `ToasterProvider` under `ThemeProvider`.
+- Cleaned up poll result UI — results display inline and highlight selected options.
+- Middleware avoids redundant DB checks for static assets and unprotected routes.
+
+## 🐛 Bug Fixes
+- Fixed error logging for failed DB checks (`payload must be object` error).
+- Ensured `votePoll()` properly skips duplicate votes and handles user-submitted options cleanly.
