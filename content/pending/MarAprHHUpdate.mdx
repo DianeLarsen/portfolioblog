@@ -21,3 +21,28 @@
 ## 🐛 Bug Fixes
 - Fixed error logging for failed DB checks (`payload must be object` error).
 - Ensured `votePoll()` properly skips duplicate votes and handles user-submitted options cleanly.
+
+#### ### Story Feature Enhancements
+
+- 📸 **Added media preview & upload via Cloudinary widget**
+  - User can select images, videos, or audio to upload
+  - Shows thumbnail or playback preview immediately
+- ✍️ **Caption Input**
+  - Appears only after media is selected
+  - Saved with story submission
+- 🖼️ **Display Stories in Scrollable Row**
+  - Stories laid out horizontally with overflow scroll enabled
+  - Upload button is always first
+- 🔍 **Interactive Story Modal**
+  - Clicking a story opens it in full modal view (image, video, or audio)
+  - No autoplay
+- 🗑️ **Delete Button**
+  - Only visible to the story creator
+  - Removes story from UI and database
+
+---
+
+#### ### Backend
+
+- ✅ `addStory` updated to support `caption` and `mediaType`
+- 🧼 Cleaned up unused `userVotedOptions` state in `PollDisplayMultiple`
