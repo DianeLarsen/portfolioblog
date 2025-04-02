@@ -46,3 +46,93 @@
 
 - ✅ `addStory` updated to support `caption` and `mediaType`
 - 🧼 Cleaned up unused `userVotedOptions` state in `PollDisplayMultiple`
+
+March 27th, 2025
+## [Unreleased]
+
+### Added
+- `withDbReady` utility function to guard server actions against database unavailability.
+- Ensures a consistent check using `globalThis.dbConnected` before executing any Prisma action.
+
+### Changed
+- Updated all server actions to use `withDbReady()` instead of manually calling `ensureDbReady()`.
+- Improved server resilience and user experience by preventing calls to the database when the server is starting or down.
+fix: prevent build-time DB access by forcing dynamic rendering on /friends /admin /birthdays /events /profile
+
+- Added `export const dynamic = "force-dynamic"` to pages that rely on runtime DB access
+- Prevents static rendering errors during build when the database is not yet connected
+- Affected pages: /friends, /admin, /birthdays, /events, /profile
+
+### Changed
+- Refactored `ensureDbReady` to redirect users to `/loading` instead of throwing an error when the database is not ready.
+- Improves user experience by preventing crashes and providing a smoother transition during server startup.
+
+## 🛠️ Fix: Database Health Check Cookie
+
+- Resolved `Property 'set' does not exist on type 'Promise<ReadonlyRequestCookies>'` error
+- Added `await` before `cookies()` in `/api/check-db` route to ensure proper cookie handling
+- Set `dbConnected` cookie to `"true"` or `"false"` with 60s lifetime
+- Improved stability and diagnostics for DB connection tracking
+
+```ts
+const cookieStore = await cookies();
+cookieStore.set("dbConnected", "true", { path: "/", maxAge: 60 });
+
+
+
+#### 🔧 Updated `<ClientComponent />`
+- **Before:** `Link href="www.havens-heroes.com/contact"`
+- **After:** `Link href="/contact"`  
+  🔹 Fixed incorrect external URL to use internal Next.js routing.
+
+#### 📱 Updated `<MobileMenu />` component
+- Added `/contact` link to the mobile navigation dropdown.
+- Ensured all routes use proper `Link` components for internal navigation:
+  - `/` → Home
+  - `/friends` → Friends
+  - `/contact` → Contact
+
+### 📅 2025-03-31
+
+#### 🗳️ Updated `<PollDisplayMultiple />` and backend vote handling
+
+- 🛡️ Enforced **one vote per user per option** at the database level using Prisma `@@unique` constraint on `(poll_id, option_id, user_id)`.
+- 🔁 Fixed issue where unchecking a selected poll option did not correctly update votes.
+- ❌ Removed automatic addition of "Unable to attend any of the dates" on poll display—this is now added during poll creation.
+- 🔧 Updated Prisma schema:
+  - Added missing relation fields for `poll.pollvotes` and `pollvote.poll`.
+  - Ensured schema is valid and migratable.
+- 🧹 Added cleanup query instructions to remove duplicate votes before applying the unique constraint.
+
+### 🗓️ **Changelog (2025-03-31)**
+
+#### 🛠 Schema Update: Post ↔ poll Relation
+- **Added bidirectional relation between `Post` and `poll` models**:
+  - **Post model**: added `poll` field with named relation `@relation("PostPoll")`
+  - **poll model**: added `post` field with matching named relation `@relation("PostPoll", fields: [post_id], references: [id])`
+- ✅ This allows Prisma to include poll data in `getAllPosts()` and other queries referencing posts with polls.
+
+---
+
+## ✨ Features Added
+- Integrated a new `PollActionsDropdown` component into `PollDisplayMultiple` to allow poll owners to manage their polls.
+  - Buttons include:
+    - End Poll
+    - Delete Poll
+    - Clear Votes
+    - (Planned) Edit Poll and Delete Option
+- Dropdown only appears if the logged-in user is the poll's creator (`isOwner`).
+
+## 🛠 Refactoring
+- Adjusted layout of `PollDisplayMultiple` to include a flex container at the top-right for the actions menu.
+- Passed `poll.user_id === userId` as `isOwner` to conditionally show the actions.
+
+## 💄 UI Enhancements
+- Positioned the `PollActionsDropdown` in the top right using `flex justify-end w-full` for better UX and visibility.
+
+## 📌 Notes
+- Next steps:
+  - Add functionality for editing question/options.
+  - Finalize admin permission support.
+  - Extend to `PollDisplay` for single-vote polls.
+
